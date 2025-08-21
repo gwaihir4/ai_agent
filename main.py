@@ -4,12 +4,13 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 
-load_dotenv()
-api_key = os.environ.get("GEMINI_API_KEY")
-client = genai.Client(api_key=api_key)
+def main():
 
-def main(*args):
-    args = list(*args)
+    load_dotenv()
+    api_key = os.environ.get("GEMINI_API_KEY")
+    client = genai.Client(api_key=api_key)
+
+    args = sys.argv
     user_prompt = args[1]
 
     prompt_info = ai_response(user_prompt)
@@ -41,4 +42,4 @@ if len(sys.argv) < 2:
     sys.exit(1)
 
 elif __name__ == "__main__":
-    main(sys.argv)
+    main()
