@@ -6,6 +6,10 @@ from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from functions.get_files_info import schema_get_files_info
+from functions.get_file_content import schema_get_file_content
+from functions.run_python import schema_run_python
+from functions.write_file import schema_write_file
+
 
 system_prompt = """
 You are a helpful AI coding agent.
@@ -28,7 +32,7 @@ def main():
 
     available_functions = types.Tool(
     function_declarations=[
-        schema_get_files_info,
+        schema_get_files_info, schema_get_file_content, schema_run_python, schema_write_file
         ]
     )
     

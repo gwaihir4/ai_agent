@@ -1,5 +1,6 @@
 import os
 from functions.initialize import initialize
+from google.genai import types
 
 MAX_CHARS = 10000
 
@@ -21,3 +22,16 @@ def get_file_content(working_directory, file_path):
     
     return file_content_string
     
+schema_get_file_content = types.FunctionDeclaration(
+    name="get_file_content",
+    description="Gets file contents in spesific directory, constrained to the working directory.",
+    parameters=types.Schema(
+        type=types.Type.OBJECT,
+        properties={
+            "directory": types.Schema(
+                type=types.Type.STRING,
+                description="The directory to get file contents from, relative to the working directory. If not provided, get content from  files in the working directory itself.",
+            ),
+        },
+    ),
+)
