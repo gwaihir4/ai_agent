@@ -5,10 +5,10 @@ import types
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-from functions.get_files_info import schema_get_files_info
-from functions.get_file_content import schema_get_file_content
-from functions.run_python import schema_run_python
-from functions.write_file import schema_write_file
+from functions.get_files_info import *
+from functions.get_file_content import *
+from functions.run_python import *
+from functions.write_file import *
 
 
 system_prompt = """
@@ -35,16 +35,26 @@ def main():
         schema_get_files_info, schema_get_file_content, schema_run_python, schema_write_file
         ]
     )
-    
+
     config=types.GenerateContentConfig(
     tools=[available_functions], system_instruction=system_prompt
     )
 
     
     prompt_info = ai_respose_return(ai_response(user_prompt, client, config))
-    verbose(args, prompt_info)
+    if isverbose(args):
+        print(f"User prompt: {user_prompt}")
+        print(f"Prompt tokens: {prompt_info["prompt_tokens"]}")
+        print(f"Response tokens: {prompt_info["response_tokens"]}")    
 
-
+    try:
+        function_capture = function_call(prompt_info["response_function_call"],isverbose(args))
+        if hasattr(function_capture.parts[0],  "function_response"):
+            if isverbose (args) and hasattr(function_capture.parts[0].function_response,  "response"):
+                print (f"-> {function_capture.parts[0].function_response.response}")
+    except Exception as e:
+         print (f"Error: returning function call {e}")
+    
 def ai_response(user_prompt, client, config = types.GenerateContentConfig(system_instruction=system_prompt)):
     user_prompt = user_prompt
 
@@ -67,26 +77,44 @@ def ai_respose_return(response):
 
     if hasattr(response.candidates[0].content.parts[0],  "function_call"):
         try:
-            response_function_calls = response.candidates[0].content.parts[0].function_call # reaching response function_calls
-            if response_function_calls is not None:
-                print(f"Calling function: {response_function_calls.name}({response_function_calls.args})")
-                return (response, prompt_tokens, response_tokens, response_function_calls)
+            response_function_call = response.candidates[0].content.parts[0].function_call # reaching response function_calls
+            if response_function_call is not None:
+                print(f"Calling function: {response_function_call.name}({response_function_call.args})")
+                return {"response": response, "prompt_tokens": prompt_tokens, "response_tokens" : response_tokens, "response_function_call": response_function_call}
         except Exception as e:
             return f"Error: function calls problem"
-    print(response.text)    
-    return (response, prompt_tokens, response_tokens)
+    # print(response.text)    
+    return {"response": response, "prompt_tokens": prompt_tokens, "response_tokens" : response_tokens}
 
+def function_call(function_call_part, verbose=False):
 
-def verbose (args, prompt_info):
+    function_dict = {"get_file_content" : get_file_content, "get_files_info" : get_files_info, "run_python_file": run_python_file, "write_file": write_file}
+    if verbose == True:
+        print(f"Calling function: {function_call_part.name}({function_call_part.args})")
+    print(f" - Calling function: {function_call_part.name}")
+
+    if function_call_part.name in function_dict:
+        #initialize function call 
+        function = function_dict[function_call_part.name]
+        args = function_call_part.args
+        args.update({"working_directory": "./calculator"})
+        function_capture = types.Content(
+                            role="tool",
+                            parts=[
+                            types.Part.from_function_response(
+                            name=function_call_part.name,
+                            response={"result": function(**args)},
+                                    )
+                                ],
+                            )
+        return function_capture
+    else:
+        raise Exception (f"Error: wrong function call")    
+
+def isverbose (args):
     if  "--verbose" in args:
-        print(f"User prompt: {prompt_info[0]}")
-        print(f"Prompt tokens: {prompt_info[2]}")
-        print(f"Response tokens: {prompt_info[3]}")
-    pass
+        return True
+    return False
 
-if len(sys.argv) < 2:
-    print("error")
-    sys.exit(1)
-
-elif __name__ == "__main__":
+if __name__ == "__main__":
     main()
