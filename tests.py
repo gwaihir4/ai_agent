@@ -1,7 +1,7 @@
-from functions.get_files_info import get_files_info
-from functions.get_file_content import get_file_content
-from functions.write_file import write_file
-from functions.run_python import run_python_file
+# from functions.get_files_info import get_files_info
+# from functions.get_file_content import get_file_content
+# from functions.write_file import write_file
+# from functions.run_python import run_python_file
 
 def test():
     # result = get_files_info("calculator", ".")
@@ -42,16 +42,16 @@ def test():
     # content_result = write_file("calculator", "/tmp/temp.txt", "this should not be allowed")
     # print (content_result),
     
-    content_result = run_python_file("calculator", "main.py")
-    print (content_result)
-    content_result = run_python_file("calculator", "main.py", ["3 + 5"])
-    print (content_result)
-    content_result = run_python_file("calculator", "tests.py")
-    print (content_result)
-    content_result = run_python_file("calculator", "../main.py") #(this should return an error)
-    print (content_result)
-    content_result = run_python_file("calculator", "nonexistent.py") #(this should return an error)
-    print (content_result)
+    # content_result = run_python_file("calculator", "main.py")
+    # print (content_result)
+    # content_result = run_python_file("calculator", "main.py", ["3 + 5"])
+    # print (content_result)
+    # content_result = run_python_file("calculator", "tests.py")
+    # print (content_result)
+    # content_result = run_python_file("calculator", "../main.py") #(this should return an error)
+    # print (content_result)
+    # content_result = run_python_file("calculator", "nonexistent.py") #(this should return an error)
+    print ("Tests for functions")
 
 if __name__ == "__main__":
     test()
